@@ -32,7 +32,7 @@ async function getVideoID(url) {
 }
 
 browser.browserAction.onClicked.addListener(async (tab) => {
-    const videoID = getVideoID(tab.url);
+    const videoID = await getVideoID(tab.url);
     if (videoID) {
         const url = "https://tiknot.netlify.app/video/" + videoID;
         browser.tabs.create({
@@ -46,7 +46,7 @@ browser.browserAction.onClicked.addListener(async (tab) => {
 browser.runtime.onInstalled.addListener(initStorage)
 
 browser.storage.local.get("deflect").then(({ deflect }) => {
-    browser.menus.create({
+    browser.contextMenus.create({
         id: "deflect",
         title: "Deflect enabled",
         contexts: ["browser_action"],
@@ -55,7 +55,7 @@ browser.storage.local.get("deflect").then(({ deflect }) => {
     })
 })
 
-browser.menus.onClicked.addListener(async (info, tab) => {
+browser.contextMenus.onClicked.addListener(async (info, tab) => {
     if (info.menuItemId === "deflect") {
         await browser.storage.local.set({ deflect: info.checked })
     }
