@@ -14,7 +14,7 @@
     "manifest_version": 2,
     "name": "Tiknot",
     "version": "1.0",
-    "permissions": ["tabs"],
+    "permissions": ["tabs", "storage", "webNavigation", "menus"],
     "background": {
         "scripts": ["background.js"],
         "persistent": false

@@ -2,28 +2,77 @@
 const videoRegex =
     /\bhttps?:\/\/(?:m|www|vm|vt)\.tiktok\.com\/\S*?\b(?:(?:(?:usr|v|embed|user|video)\/|\?shareId=|\&item_id=)(\d+)|(?=\w{7})(\w*?[A-Z\d]\w*)(?=\s|\/$))\b/;
 
-function getCurrentTab() {
-    return browser.tabs.query({ currentWindow: true, active: true });
+const filter = {
+    url: [
+        { urlMatches: videoRegex.source }
+    ]
 }
 
-browser.browserAction.onClicked.addListener(async (e) => {
-    const url = await getCurrentTab();
-    const videoID = url[0].url.split("?")[0].split("/").pop();
-    browser.tabs.create({
-        url: "https://tiknot.netlify.app/video/" + videoID,
-    });
-});
+async function initStorage() {
+    let storage = await browser.storage.local.get()
+    if (storage.deflect === undefined) {
+        await browser.storage.local.set({ deflect: true })
+    }
+}
 
-browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tabInfo) => {
-    console.log(changeInfo.url);
-    if (changeInfo.url) {
-        if (tabInfo.url.match(videoRegex)) {
-            console.log("Tiktok video detected");
-            const url = await getCurrentTab();
-            const videoID = url[0].url.split("?")[0].split("/").pop();
-            browser.tabs.create({
-                url: "https://tiknot.netlify.app/video/" + videoID,
-            });
+async function getVideoID(url) {
+    const matches = url.match(videoRegex);
+    if (!matches) {
+        return null
+    }
+    else if (matches[1]) {
+        return matches[1]
+    } else if (matches[2]) {
+        let response = await fetch('https://www.tikwm.com/api/?url=' + url);
+        let data = await response.json();
+        if (data.code === 0) {
+            return data.data.id
         }
     }
+}
+
+browser.browserAction.onClicked.addListener(async (tab) => {
+    const videoID = getVideoID(tab.url);
+    if (videoID) {
+        const url = "https://tiknot.netlify.app/video/" + videoID;
+        browser.tabs.create({
+            url: url,
+        });
+        navigator.clipboard.writeText(url);
+    }
+
 });
+
+browser.runtime.onInstalled.addListener(initStorage)
+
+browser.storage.local.get("deflect").then(({ deflect }) => {
+    browser.menus.create({
+        id: "deflect",
+        title: "Deflect enabled",
+        contexts: ["browser_action"],
+        type: "checkbox",
+        checked: deflect,
+    })
+})
+
+browser.menus.onClicked.addListener(async (info, tab) => {
+    if (info.menuItemId === "deflect") {
+        await browser.storage.local.set({ deflect: info.checked })
+    }
+})
+
+browser.webNavigation.onBeforeNavigate.addListener(async (details) => {
+    const { deflect } = await browser.storage.local.get("deflect")
+    if (!deflect) {
+        return
+    }
+    const videoID = await getVideoID(details.url);
+    console.log(videoID)
+    if (videoID) {
+        console.log("Tiktok video detected");
+        const url = "https://tiknot.netlify.app/video/" + videoID;
+        browser.tabs.update(details.tabId, {
+            url: url,
+        })
+    }
+}, filter)
