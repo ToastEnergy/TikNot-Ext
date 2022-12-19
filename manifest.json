@@ -1,0 +1,22 @@
+{
+    "browser_action": {
+        "default_title": "Copy link to TikNot",
+        "default_icon": {
+            "48": "icons/tiknot48.png"
+        }
+    },
+    "icons": {
+        "48": "icons/window.png",
+        "96": "icons/window@2x.png"
+    },
+    "description": "A list of methods you can perform on a window.",
+    "homepage_url": "https://github.com/mdn/webextensions-examples/tree/master/window-manipulator",
+    "manifest_version": 2,
+    "name": "Tiknot",
+    "version": "1.0",
+    "permissions": ["tabs"],
+    "background": {
+        "scripts": ["background.js"],
+        "persistent": false
+    }
+}
