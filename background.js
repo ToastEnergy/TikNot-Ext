@@ -12,6 +12,13 @@ async function initStorage() {
     let storage = await browser.storage.local.get()
     if (storage.deflect === undefined) {
         await browser.storage.local.set({ deflect: true })
+        await browser.contextMenus.create({
+            id: "deflect",
+            title: "Deflect enabled",
+            contexts: ["browser_action"],
+            type: "checkbox",
+            checked: true,
+        })
     }
 }
 
@@ -35,25 +42,16 @@ browser.browserAction.onClicked.addListener(async (tab) => {
     const videoID = await getVideoID(tab.url);
     if (videoID) {
         const url = "https://tiknot.netlify.app/video/" + videoID;
-        browser.tabs.create({
+        await browser.tabs.create({
             url: url,
         });
-        navigator.clipboard.writeText(url);
+        await navigator.clipboard.writeText(url);
     }
 
 });
 
 browser.runtime.onInstalled.addListener(initStorage)
 
-browser.storage.local.get("deflect").then(({ deflect }) => {
-    browser.contextMenus.create({
-        id: "deflect",
-        title: "Deflect enabled",
-        contexts: ["browser_action"],
-        type: "checkbox",
-        checked: deflect,
-    })
-})
 
 browser.contextMenus.onClicked.addListener(async (info, tab) => {
     if (info.menuItemId === "deflect") {
