@@ -25,7 +25,14 @@ async function initStorage() {
 async function getVideoID(url) {
     const matches = url.match(videoRegex);
     if (!matches) {
-        return null
+        const urlObj = new URL(url);
+        if(urlObj.pathname !== "/login") {
+            return null
+        }
+        const redirectUrl = urlObj.searchParams.get("redirect_url")
+        if(redirectUrl){
+            return await getVideoID(redirectUrl)
+        }
     }
     else if (matches[1]) {
         return matches[1]
