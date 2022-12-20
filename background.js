@@ -8,17 +8,17 @@ const filter = {
     ]
 }
 
+browser.contextMenus.create({
+    id: "deflect",
+    title: "Deflect enabled",
+    contexts: ["browser_action"],
+    type: "checkbox"
+})
+
 async function initStorage() {
     let storage = await browser.storage.local.get()
     if (storage.deflect === undefined) {
         await browser.storage.local.set({ deflect: true })
-        await browser.contextMenus.create({
-            id: "deflect",
-            title: "Deflect enabled",
-            contexts: ["browser_action"],
-            type: "checkbox",
-            checked: true,
-        })
     }
 }
 
@@ -37,6 +37,20 @@ async function getVideoID(url) {
         }
     }
 }
+
+browser.storage.local.get("deflect").then((data) => {
+    browser.contextMenus.update("deflect", {
+        checked: data.deflect
+    })
+})
+
+browser.storage.onChanged.addListener(async (changes) => {
+    if (changes.deflect) {
+        browser.contextMenus.update("deflect", {
+            checked: changes.deflect.newValue
+        })
+    }
+})
 
 browser.browserAction.onClicked.addListener(async (tab) => {
     const videoID = await getVideoID(tab.url);
