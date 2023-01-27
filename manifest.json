@@ -15,7 +15,7 @@
     "browser_specific_settings": {
         "gecko": {
             "id": "tiknot@chickenmatty.me",
-            "strict_min_version": "42.0"
+            "strict_min_version": "55.0"
         }
     },
     "icons": {
