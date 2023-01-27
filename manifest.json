@@ -5,8 +5,8 @@
             "48": "icons/tiknot48.png"
         }
     },
-    "description": "A list of methods you can perform on a window.",
-    "homepage_url": "https://github.com/mdn/webextensions-examples/tree/master/window-manipulator",
+    "description": "Watch TikTok videos without logging in! Just open a TikTok link and this extension will redirect you to TikNot",
+    "homepage_url": "https://github.com/ToastEnergy/TikNot-Ext/",
     "manifest_version": 2,
     "name": "Tiknot",
     "version": "1.0",
