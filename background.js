@@ -8,6 +8,10 @@ const filter = {
     ]
 }
 
+const TIKNOT_URL = "https://tiknot.netlify.app"
+
+const sleep = () => new Promise((resolve) => setTimeout(resolve, 1000))
+
 browser.contextMenus.create({
     id: "deflect",
     title: "Deflect enabled",
@@ -38,6 +42,7 @@ async function getVideoID(url) {
         return matches[1]
     } else if (matches[2]) {
         let response = await fetch('https://www.tikwm.com/api/?url=' + url);
+        await sleep() // sleeping for 1 second to avoid rate limiting, tiknot would fail to refetch
         let data = await response.json();
         if (data.code === 0) {
             return data.data.id
@@ -62,7 +67,7 @@ browser.storage.onChanged.addListener(async (changes) => {
 browser.browserAction.onClicked.addListener(async (tab) => {
     const videoID = await getVideoID(tab.url);
     if (videoID) {
-        const url = "https://tiknot.netlify.app/video/" + videoID;
+        const url = TIKNOT_URL + "/video/" + videoID;
         await browser.tabs.create({
             url: url,
         });
@@ -89,7 +94,7 @@ browser.webNavigation.onBeforeNavigate.addListener(async (details) => {
     console.log(videoID)
     if (videoID) {
         console.log("Tiktok video detected");
-        const url = "https://tiknot.netlify.app/video/" + videoID;
+        const url = TIKNOT_URL + "/video/" + videoID;
         browser.tabs.update(details.tabId, {
             url: url,
         })
